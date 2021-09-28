@@ -623,9 +623,53 @@ public class EFQRCodeGenerator: NSObject {
                     )
                 }
             }
+            // Draw static points
+            let pointHeight = (scaleY - 2 * pointOffset) * 6.5
+
+            //Top Left point
+            let borderEnd = CGFloat(codeSize) - ((pointHeight/(scaleY-1))) - 1
+            
+            createCornerPoint(x: 0.0, y: borderEnd, context: context, codeSize: codeSize)
+            //Top Right point
+            createCornerPoint(x: borderEnd, y: borderEnd, context: context, codeSize: codeSize)
+            //Bottom Left point
+            createCornerPoint(x: 0, y: 0, context: context, codeSize: codeSize)
+            
             result = context.makeImage()
         }
         return result
+    }
+    
+    private func createCornerPoint(x: CGFloat, y: CGFloat, context: CGContext, codeSize: Int) {
+        let scaleX = size.width.cgFloat / CGFloat(codeSize)
+        let scaleY = size.height.cgFloat / CGFloat(codeSize)
+        
+        let pointWidth = (scaleX - 2 * pointOffset) * 6.5
+        let pointHeight = (scaleY - 2 * pointOffset) * 6.5
+        
+        //Middle point
+        let middleWidth = (scaleX - 2 * pointOffset) * 4
+        let middleHeight = (scaleY - 2 * pointOffset) * 4
+        let middlePointRect = CGRect(
+            x: (x * scaleX + pointOffset) + (pointWidth/4) + (middleWidth/4) + (scaleX/4),
+            y: (y * scaleY + pointOffset) + (pointHeight/4) + (middleHeight/4) + (scaleX/4),
+            width: middleWidth,
+            height: middleHeight
+        )
+        context.fillEllipse(in: middlePointRect)
+        
+        
+        //Outer circle
+        let outerCircleRect = CGRect(
+            x: (x * scaleX + pointOffset) + (pointWidth/4),
+            y: (y * scaleY + pointOffset) + (pointHeight/4),
+            width: pointWidth,
+            height: pointHeight
+        )
+        context.setLineWidth(1 * scaleX)
+        context.strokeEllipse(in: outerCircleRect)
+        
+        
     }
 
     #if canImport(CoreImage)
@@ -840,7 +884,11 @@ public class EFQRCodeGenerator: NSObject {
     private func drawPoint(context: CGContext, rect: CGRect, isStatic: Bool = false) {
         switch pointShape {
         case .circle:
-            context.fillEllipse(in: rect)
+            if isStatic {
+//                context.fill(rect)
+            } else {
+                context.fillEllipse(in: rect)
+            }
         case .diamond:
             if isStatic {
                 context.fill(rect)
@@ -939,14 +987,14 @@ public class EFQRCodeGenerator: NSObject {
                 return true
             }
         }
-
+        return false
         // Alignment Patterns
-        return APLPoints.contains { point in
-            x >= Int(point.x - 2)
-                && x <= Int(point.x + 2)
-                && y >= Int(point.y - 2)
-                && y <= Int(point.y + 2)
-        }
+//        return APLPoints.contains { point in
+//            x >= Int(point.x - 2)
+//                && x <= Int(point.x + 2)
+//                && y >= Int(point.y - 2)
+//                && y <= Int(point.y + 2)
+//        }
     }
 
     /// [Alignment Pattern Locations](
