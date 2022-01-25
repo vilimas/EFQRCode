@@ -31,6 +31,7 @@ import QRCodeSwift
 #endif
 import CoreGraphics
 import Foundation
+import UIKit
 
 /// Class for generating QR code images.
 @objcMembers
@@ -616,8 +617,8 @@ public class EFQRCodeGenerator: NSObject {
                         rect: CGRect(
                             x: CGFloat(indexXCTM) * scaleX + pointOffset,
                             y: CGFloat(indexYCTM) * scaleY + pointOffset,
-                            width: scaleX - 2 * pointOffset,
-                            height: scaleY - 2 * pointOffset
+                            width: (scaleX - 2 * pointOffset) - 5,
+                            height: (scaleY - 2 * pointOffset) - 5
                         ),
                         isStatic: isStaticPoint
                     )
@@ -648,16 +649,24 @@ public class EFQRCodeGenerator: NSObject {
         let pointHeight = (scaleY - 2 * pointOffset) * 6.5
         
         //Middle point
-        let middleWidth = (scaleX - 2 * pointOffset) * 4
-        let middleHeight = (scaleY - 2 * pointOffset) * 4
+        let middleWidth = (scaleX - 2 * pointOffset) * 3.5
+        let middleHeight = (scaleY - 2 * pointOffset) * 3.5
         let middlePointRect = CGRect(
-            x: (x * scaleX + pointOffset) + (pointWidth/4) + (middleWidth/4) + (scaleX/4),
-            y: (y * scaleY + pointOffset) + (pointHeight/4) + (middleHeight/4) + (scaleX/4),
+            x: (x * scaleX + pointOffset) + (pointWidth + middleWidth + scaleX)/3.5,
+            y: (y * scaleY + pointOffset) + (pointHeight + middleHeight + scaleX)/3.5,
             width: middleWidth,
             height: middleHeight
         )
-        context.fillEllipse(in: middlePointRect)
         
+        let middlePath = UIBezierPath(
+          roundedRect: middlePointRect,
+          byRoundingCorners: [.allCorners],
+          cornerRadii: CGSize(width: middlePointRect.height/3.2, height: middlePointRect.height/3.2)
+        )
+        context.addPath(middlePath.cgPath)
+        context.closePath()
+        context.fillPath()
+                
         
         //Outer circle
         let outerCircleRect = CGRect(
@@ -667,8 +676,15 @@ public class EFQRCodeGenerator: NSObject {
             height: pointHeight
         )
         context.setLineWidth(1 * scaleX)
-        context.strokeEllipse(in: outerCircleRect)
         
+        let path = UIBezierPath(
+          roundedRect: outerCircleRect,
+          byRoundingCorners: [.allCorners],
+          cornerRadii: CGSize(width: outerCircleRect.height/3.2, height: outerCircleRect.height/3.2)
+        )
+        context.addPath(path.cgPath)
+        context.closePath()
+        context.strokePath()
         
     }
 
